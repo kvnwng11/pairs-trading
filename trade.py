@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import scipy.optimize as spop
-import matplotlib.pyplot as plt
 from collections import deque  # for fast csv reading
 from io import StringIO
 
