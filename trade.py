@@ -51,6 +51,9 @@ for symbol in symbols:
     d = (df.iloc[1:, :]).iloc[:, 0].to_numpy().astype(float)
     raw_data[symbol] = d
 
+if len(raw_data) < N:
+    exit()
+
 # read in last state
 last_state = pd.read_csv(path+statefile)
 last_state.columns = ['timestamp', 'balance', 'current_return', 'gross_returns', 'net_returns',
