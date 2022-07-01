@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import os
 from collections import deque
@@ -6,7 +7,7 @@ import cbpro  # coinbase pro api
 
 client = cbpro.PublicClient()
 path = 'csv/'
-symbols = ['BTC', 'LTC']
+symbols = ['DOGE', 'SHIB']
 
 
 def get_historical_prices():
@@ -23,8 +24,10 @@ def get_historical_prices():
             until = start + pd.Timedelta(minutes=300)
             prices = pd.DataFrame()
             while until <= end:
-                data = client.get_product_historic_rates(
-                    asset+'-USD', granularity=60, start=start, end=until)[::-1]
+                data = np.array(client.get_product_historic_rates(asset+'-USD', granularity=60, start=start, end=until))
+                if data.size == 1:
+                    break
+                data = data[::-1]
                 df = pd.DataFrame(data)
                 prices = pd.concat([prices, df], ignore_index=True, axis=0)
                 start += pd.Timedelta(minutes=300)
@@ -32,9 +35,7 @@ def get_historical_prices():
             prices.columns = ['time', 'low', 'high', 'open', 'close', 'volume']
             prices['time'] = pd.to_datetime(prices['time'], unit='s')
             prices.drop_duplicates(subset='time', keep='last', inplace=True)
-            prices[['time', 'close']].to_csv(
-                asset_path, mode='a', header=False, index=False)
-
+            prices[['time', 'close']].to_csv(asset_path, mode='a', header=False, index=False)
 
 def update_prices():
     # update any gaps in the csv file
@@ -46,27 +47,26 @@ def update_prices():
             q = deque(f, N)
         prices = pd.read_csv(StringIO(''.join(q)), header=None)
         prices.columns = ['time', 'close']
-        start = pd.to_datetime(
-            prices['time'].iloc[-1]) + pd.Timedelta(minutes=1)
+        start = pd.to_datetime(prices['time'].iloc[-1]) + pd.Timedelta(minutes=1)
         end = (pd.Timestamp.now() - pd.Timedelta(minutes=1)).round(freq='T')
         until = start + min(pd.Timedelta(minutes=300), end-start)
 
         if start <= end:
             while until <= end:
-                data = client.get_product_historic_rates(
-                    asset+'-USD', granularity=60, start=start, end=until)[::-1]
+                data = np.array(client.get_product_historic_rates(asset+'-USD', granularity=60, start=start, end=until))
+                if data.size == 1:
+                    break
+                data = data[::-1]
                 df = pd.DataFrame(data)
+                
                 df.columns = ['time', 'low', 'high', 'open', 'close', 'volume']
-                df.drop(['low', 'high', 'open', 'volume'],
-                        axis=1, inplace=True)
+                df.drop(['low', 'high', 'open', 'volume'],axis=1, inplace=True)
                 df['time'] = pd.to_datetime(df['time'], unit='s')
                 prices = pd.concat([prices, df], ignore_index=True, axis=0)
                 start += pd.Timedelta(minutes=300)
                 until += pd.Timedelta(minutes=300)
             prices.drop_duplicates(subset='time', keep='last', inplace=True)
-            prices[['time', 'close']].to_csv(
-                asset_path, mode='a', header=False, index=False)
-
+            prices[['time', 'close']].to_csv(asset_path, mode='a', header=False, index=False)
 
 get_historical_prices()
 update_prices()
