@@ -40,7 +40,7 @@ def get_historical_prices():
         if not os.path.exists(asset_path):
             end = dt.datetime.utcnow()
             end = end - dt.timedelta(minutes=1, seconds=end.second, microseconds=end.microsecond)
-            start = end - dt.timedelta(days=30)
+            start = end - dt.timedelta(days=32)
 
             prices = pd.DataFrame(GetHistoricalData(asset, start, end))
             prices[['time', 'close']].to_csv(asset_path, mode='w', header=False, index=False)
@@ -56,10 +56,11 @@ def update_prices():
         prices = pd.read_csv(StringIO(''.join(q)), header=None)
         prices.columns = ['time', 'close']
 
-        start = dt.strptime(prices['time'].iloc[-1], "%Y-%m-%d %H:%M:%S") + dt.timedelta(minutes=1)
+        start = dt.datetime.strptime(prices['time'].iloc[-1], "%Y-%m-%d %H:%M:%S") + dt.timedelta(minutes=1)
         end = dt.datetime.utcnow()
         end = end - dt.timedelta(minutes=1, seconds=end.second, microseconds=end.microsecond)
-
+        print("start: ", start)
+        print("end: ", end)
         prices = pd.DataFrame(GetHistoricalData(asset, start, end))
         prices[['time', 'close']].to_csv(asset_path, mode='a', header=False, index=False)
 
