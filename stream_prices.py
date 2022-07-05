@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime
 import os
 from collections import deque
 from io import StringIO
@@ -7,7 +8,7 @@ import cbpro  # coinbase pro api
 
 client = cbpro.PublicClient()
 path = 'csv/'
-symbols = ['DOGE', 'SHIB']
+symbols = ['DOGE', 'SHIB', 'BTC', 'LTC', 'MATIC']
 
 
 def get_historical_prices():
@@ -16,22 +17,42 @@ def get_historical_prices():
     # create and populate needed csvs
     for asset in symbols:
         asset_path = path+asset+'.csv'
-        # if no csv file exists pull minute data from the last 30 days
+        # if no csv file exists, pull minute data from the last 30 days
         if not os.path.exists(asset_path):
+            
             end = (pd.Timestamp.now()).round(
                 freq='T') - pd.Timedelta(minutes=1)
             start = end - pd.Timedelta(days=30)
             until = start + pd.Timedelta(minutes=300)
+            
+            print(asset)
             prices = pd.DataFrame()
+            """
+            end = datetime.datetime.utcnow()
+            end = end-datetime.timedelta(minutes=1, seconds=end.second, microseconds=end.microsecond)
+            start = end - datetime.timedelta(days=30)
+            until = end + datetime.timedelta(minutes=300)
+            """
+            unsupported = 0
             while until <= end:
                 data = np.array(client.get_product_historic_rates(asset+'-USD', granularity=60, start=start, end=until))
                 if data.size == 1:
+                    print("data size is 1")
+                    print(data)
+                    print("start: ", start)
+                    print("until: ", until)
+                    break
+                elif len(data) == 0:
+                    print("unsupported token")
+                    unsupported = 1
                     break
                 data = data[::-1]
                 df = pd.DataFrame(data)
                 prices = pd.concat([prices, df], ignore_index=True, axis=0)
-                start += pd.Timedelta(minutes=300)
-                until += pd.Timedelta(minutes=300)
+                start += pd.Timedelta(minutes=300) #datetime.timedelta(minutes=300)
+                until += pd.Timedelta(minutes=300) #datetime.timedelta(minutes=300)
+            if unsupported == 1:
+                continue
             prices.columns = ['time', 'low', 'high', 'open', 'close', 'volume']
             prices['time'] = pd.to_datetime(prices['time'], unit='s')
             prices.drop_duplicates(subset='time', keep='last', inplace=True)
