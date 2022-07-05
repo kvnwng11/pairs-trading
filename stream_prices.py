@@ -27,13 +27,12 @@ def get_historical_prices():
                           'quoteAssetVolume', 'numberOfTrades', 'takerBuyBaseVol', 'takerBuyQuoteVol', 'ignore'])
         # as timestamp is returned in ms, let us convert this back to proper timestamps.
         df['time'] = pd.to_datetime(df['time'], unit='ms').dt.strftime("%Y-%m-%d %H:%M:%S")
-        df.set_index('time', inplace=True)
 
         # Get rid of columns we do not need
         df = df.drop(['closeTime', 'quoteAssetVolume', 'numberOfTrades',
                      'takerBuyBaseVol', 'takerBuyQuoteVol', 'ignore'], axis=1)
 
-        return df['close']
+        return df[['time','close']]
 
     # create and populate needed csvs
     for asset in symbols:
@@ -45,7 +44,8 @@ def get_historical_prices():
             start = end - dt.timedelta(days=30)
 
             prices = pd.DataFrame(GetHistoricalData(asset, start, end))
-            prices.drop_duplicates(subset='time', keep='last', inplace=True)
+            #print(prices)
+            #prices.drop_duplicates(subset='time', keep='last', inplace=True)
             prices[['time', 'close']].to_csv(asset_path, mode='w', header=False, index=False)
 
 def update_prices():
