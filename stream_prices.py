@@ -59,8 +59,8 @@ def update_prices():
         start = dt.datetime.strptime(prices['time'].iloc[-1], "%Y-%m-%d %H:%M:%S") + dt.timedelta(minutes=1)
         end = dt.datetime.utcnow()
         end = end - dt.timedelta(minutes=1, seconds=end.second, microseconds=end.microsecond)
-        print("start: ", start)
-        print("end: ", end)
+        #print("start: ", start)
+        #print("end: ", end)
         prices = pd.DataFrame(GetHistoricalData(asset, start, end))
         prices[['time', 'close']].to_csv(asset_path, mode='a', header=False, index=False)
 
