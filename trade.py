@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from collections import deque
 from io import StringIO
 
-path = '/home/kvnwng11/code/pairs-trading/csv/'
+data_path = '/home/kvnwng11/code/pairs-trading/csv/'
+state_path = '/home/kvnwng11/code/pairs-trading/state/'
 statefile = 'spread_state.csv'
 
 pair = ['DOGE', 'SHIB']
@@ -31,7 +32,7 @@ def zscore(data, curr):
 # downloading price data for stocks and the market index
 raw_data = pd.DataFrame()
 for symbol in pair:
-    p = path+symbol+'.csv'
+    p = data_path+symbol+'.csv'
     with open(p, 'r') as f:
         q = deque(f, N)
     df = pd.read_csv(StringIO(''.join(q)), header=None)
@@ -40,7 +41,7 @@ for symbol in pair:
     raw_data[symbol] = d
 
 # read in last state
-last_state = pd.read_csv(path+statefile)
+last_state = pd.read_csv(state_path+statefile)
 last_state.columns = ['timestamp', 'balance', 'current_return', 'gross_returns', 'net_returns','position0', 'price0', 'position1', 'price1', 'signal',  'numtrades', 'zscore']
 last_state = last_state.tail(1)
 signal = last_state['signal'].iloc[-1]
@@ -133,4 +134,4 @@ new_state = {'timestamp': [today],
              'zscore': [curr_zscore]}
 
 update = pd.DataFrame(new_state)
-update.to_csv(path+statefile, mode='a', header=False, index=False)
+update.to_csv(state_path+statefile, mode='a', header=False, index=False)
