@@ -5,12 +5,14 @@ import os
 from collections import deque
 from io import StringIO
 from binance.client import Client
+import warnings
+warnings.filterwarnings("ignore")
 
 api_key = 'XMkgHm97q4ScccpiRb1Lf0Ta8BYanEPHBjIgwZatDqaNkPcgfnuSUFaWLdOL97IF'
 api_secret = '5E2PnhoRqx0nPD3QZ7cJaGvKgnlHuiGpd15x94eXKKaWvk2DtO8qNylrC63otSIj'
 client = Client(api_key, api_secret)
 
-path = 'csv/'
+path = '/home/kvnwng11/code/pairs-trading/csv/'
 symbols = ['DOGE', 'SHIB', 'BTC', 'LTC', 'MATIC', 'XRP']
 
 def GetHistoricalData(coin, start_time, end_time):
@@ -58,7 +60,7 @@ def update_prices():
 
         start = dt.datetime.strptime(prices['time'].iloc[-1], "%Y-%m-%d %H:%M:%S") + dt.timedelta(minutes=1)
         end = dt.datetime.utcnow()
-        end = end - dt.timedelta(minutes=1, seconds=end.second, microseconds=end.microsecond)
+        end = end - dt.timedelta(seconds=end.second, microseconds=end.microsecond)
         #print("start: ", start)
         #print("end: ", end)
         prices = pd.DataFrame(GetHistoricalData(asset, start, end))
@@ -66,3 +68,4 @@ def update_prices():
 
 get_historical_prices()
 update_prices()
+print("Success")
