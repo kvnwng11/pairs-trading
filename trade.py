@@ -6,9 +6,9 @@ from io import StringIO
 
 data_path = '/home/kvnwng11/code/pairs-trading/csv/'
 state_path = '/home/kvnwng11/code/pairs-trading/state/'
-statefile = 'spread_state.csv'
+statefile = ''
 
-pair = ['DOGE', 'SHIB']
+pair = ['', '']
 
 window = 30 * 1440
 stop_loss = -0.05
