@@ -16,19 +16,13 @@ path = '/home/kvnwng11/code/pairs-trading/csv/'
 symbols = ['DOGE', 'SHIB', 'BTC', 'LTC', 'MATIC', 'XRP', 'ETH', 'SOL', 'ADA']
 
 def GetHistoricalData(coin, start_time, end_time):
-    # Calculate the timestamps for the binance api function
     untilThisDate = end_time
     sinceThisDate = start_time
-    # Execute the query from binance - timestamps must be converted to strings !
     candle = client.get_historical_klines(f'{coin}USDT', Client.KLINE_INTERVAL_1MINUTE, str(sinceThisDate), str(untilThisDate))
 
-    # Create a dataframe to label all the columns returned by binance so we work with them later.
     df = pd.DataFrame(candle, columns=['time', 'open', 'high', 'low', 'close', 'volume', 'closeTime',
                         'quoteAssetVolume', 'numberOfTrades', 'takerBuyBaseVol', 'takerBuyQuoteVol', 'ignore'])
-    # as timestamp is returned in ms, let us convert this back to proper timestamps.
     df['time'] = pd.to_datetime(df['time'], unit='ms').dt.strftime("%Y-%m-%d %H:%M:%S")
-
-    # Get rid of columns we do not need
     df = df.drop(['closeTime', 'quoteAssetVolume', 'numberOfTrades',
                     'takerBuyBaseVol', 'takerBuyQuoteVol', 'ignore'], axis=1)
 
