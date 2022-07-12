@@ -111,7 +111,6 @@ else:
     # exit signal
     if curr_zscore >= exit_zscore-0.1 and curr_zscore <= exit_zscore+0.1:
         signal = 0
-        trade = curr_zscore
     # still in position
     elif np.sign(curr_zscore) == old_signal:
         signal = old_signal
