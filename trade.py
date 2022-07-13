@@ -4,8 +4,8 @@ import statsmodels.api as sm
 from collections import deque
 from io import StringIO
 
-data_path = '/home/kvnwng11/code/pairs-trading/csv/'
-state_path = '/home/kvnwng11/code/pairs-trading/state/'
+data_path = '/home/kvnwng11/pairs-trading/csv/'
+state_path = '/home/kvnwng11/pairs-trading/state/'
 statefile = ''
 
 pair = ['', '']

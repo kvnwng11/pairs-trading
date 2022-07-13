@@ -12,7 +12,7 @@ api_key = 'XMkgHm97q4ScccpiRb1Lf0Ta8BYanEPHBjIgwZatDqaNkPcgfnuSUFaWLdOL97IF'
 api_secret = '5E2PnhoRqx0nPD3QZ7cJaGvKgnlHuiGpd15x94eXKKaWvk2DtO8qNylrC63otSIj'
 client = Client(api_key, api_secret)
 
-path = '/home/kvnwng11/code/pairs-trading/csv/'
+path = '/home/kvnwng11/pairs-trading/csv/'
 symbols = ['DOGE', 'SHIB', 'BTC', 'LTC', 'MATIC', 'XRP', 'ETH', 'SOL', 'ADA']
 
 def GetHistoricalData(coin, start_time, end_time):

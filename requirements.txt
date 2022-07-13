@@ -2,5 +2,6 @@ pandas
 numpy
 scipy
 statsmodels
-binance
+python-binance
 datetime
+requests
