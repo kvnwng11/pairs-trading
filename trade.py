@@ -34,7 +34,7 @@ def trade():
     
     for pair in pairs:
         # initialize
-        statefile = pair[0]+'-'+pair[1]+'.csv'
+        statefile = state_path+pair[0]+'-'+pair[1]+'.csv'
         x_label = pair[0]
         y_label = pair[1]
         x_position = 0
@@ -44,7 +44,7 @@ def trade():
 
         # create statefile if non-existent
         if not os.path.exists(statefile):
-            src = 'template.csv'
+            src = state_path+'template.csv'
             dst = statefile
             shutil.copy(src, dst)
 
