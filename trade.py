@@ -43,7 +43,7 @@ def trade():
         current_return = 0
 
         # create statefile if non-existent
-        if not os.path.exists(statefile):
+        if not os.path.exists(state_path+statefile):
             src = state_path+'template.csv'
             dst = state_path+statefile
             shutil.copy(src, dst)
