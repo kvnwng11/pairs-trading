@@ -91,24 +91,27 @@ def trade(pair):
 
     current_return = x_old_position*(curr_x/raw_data[x_label][t-1] - 1) + y_old_position*(curr_y/raw_data[y_label][t-1] - 1)
 
+    enter = 0
+    exit = 0
     # check for stop loss
     if current_return < stop_loss:
         signal = 0
+        exit = 1
     # check if still in trade
     else:
         # decide to exit
         if curr_zscore >= -exit_zscore-0.1 and curr_zscore <= exit_zscore+0.1:
             signal = old_signal = 0
             x_position = y_position = 0
-            current_return = (1-commission) * current_return
+            exit = 1
         elif signal == 1:
             signal = old_signal = 0
             x_position = y_position = 0
-            current_return = (1-commission) * current_return
+            exit = 1
         elif signal == -1:
             signal = old_signal = 0
             x_position = y_position = 0
-            current_return = (1-commission) * current_return
+            exit = 1
         
         # decide to trade
         if np.sign(curr_zscore) == old_signal:
@@ -120,19 +123,27 @@ def trade(pair):
             signal = 1
             x_position = signal
             y_position = -hedge_ratio*signal
+            enter = 1
         # buy signal
         elif curr_zscore < -entry_zscore:
             signal = -1
             x_position = signal
             y_position = -hedge_ratio*signal
+            enter = 1
         # do nothing
         else:
             signal = 0
             x_position = y_position = 0
 
     # commission calculation
-    if signal != old_signal:
-        current_return = (1-commission) * current_return
+    if enter == 1 and exit == 1:
+        current_return -= 2*commission
+    elif enter == 1:
+        current_return -= commission
+        numtrades += 1
+    elif exit == 1:
+        current_return -= commission
+
     if signal == 0:
         current_return = 0
 
