@@ -1,2 +1,2 @@
-timestamp,balance,returns,x_position,x_price,y_position,y_price,signal,numtrades,zscore
-2022-01-01 00:00:00,1000,0,0,0,0,0,0,0,0
+timestamp,balance,returns,x_position,y_position,beta,signal,numtrades,zscore
+2022-01-01 00:00:00,1000,0,0,0,0,0,0,0
