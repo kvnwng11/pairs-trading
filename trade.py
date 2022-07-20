@@ -140,12 +140,13 @@ def trade(pair):
         current_return -= 2*commission
     elif enter == 1:
         current_return -= commission
-        numtrades += 1
     elif exit == 1:
         current_return -= commission
 
     if signal == 0:
         current_return = 0
+    if enter == 1:
+        numtrades += 1
 
     # calculate returns
     balance *= (1+current_return)
