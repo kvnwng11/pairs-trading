@@ -52,7 +52,7 @@ def trade(pair):
     last_state = pd.read_csv(state_path+statefile)
     last_state.columns = ['timestamp', 'balance', 'returns', 'x_position' 'y_position', 'beta', 'signal',  'numtrades', 'zscore']
     last_state = last_state.tail(1)
-    signal = last_state['signal'].iloc[-1]
+    old_signal = last_state['signal'].iloc[-1]
     x_old_position = last_state['x_position'].iloc[-1]
     y_old_position = last_state['y_position'].iloc[-1]
     numtrades = last_state['numtrades'].iloc[-1]
@@ -71,7 +71,6 @@ def trade(pair):
 
     # initialize variables
     t = len(raw_data)-1
-    old_signal = signal
     past_data = raw_data[[x_label,y_label]][t-window-1:t-1]
     x = np.array(past_data[x_label])
     y = np.array(past_data[y_label])
