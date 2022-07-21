@@ -5,3 +5,6 @@ build:
 
 state:
 	find state -type f -not -name "*template*" -delete
+
+bt:
+	find state -type f -name "*-BT.csv" -delete

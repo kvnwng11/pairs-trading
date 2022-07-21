@@ -103,14 +103,6 @@ def trade(pair):
             signal = old_signal = 0
             x_position = y_position = 0
             exit = 1
-        elif signal == 1:
-            signal = old_signal = 0
-            x_position = y_position = 0
-            exit = 1
-        elif signal == -1:
-            signal = old_signal = 0
-            x_position = y_position = 0
-            exit = 1
         
         # decide to trade
         if np.sign(curr_zscore) == old_signal:

@@ -48,7 +48,7 @@ def trade(pair):
         df = pd.read_csv(p, header=None)
         raw_data.index = df.iloc[:, 0]
         df = df.drop(df.columns[[0]], axis=1)
-        d = (df.iloc[1:, :]).iloc[:, 0].to_numpy().astype(float)
+        d = (df.iloc[0:, :]).iloc[:, 0].to_numpy().astype(float)
         raw_data[symbol] = d
 
     balance = 1000
@@ -56,6 +56,7 @@ def trade(pair):
 
     # loop through all price data
     for t in range(window+1, len(raw_data)):
+        #print("begin signal: ", signal)
         old_signal = signal
         x_old_position = x_position
         y_old_position = y_position
@@ -91,14 +92,6 @@ def trade(pair):
                 signal = old_signal = 0
                 x_position = y_position = 0
                 exit = 1
-            elif signal == 1:
-                signal = old_signal = 0
-                x_position = y_position = 0
-                exit = 1
-            elif signal == -1:
-                signal = old_signal = 0
-                x_position = y_position = 0
-                exit = 1
             
             # decide to trade
             if np.sign(curr_zscore) == old_signal:
@@ -121,6 +114,9 @@ def trade(pair):
             else:
                 signal = 0
                 x_position = y_position = 0
+
+        #print("old_signal: ", old_signal)
+        #print("signal: ", signal)
 
         # commission calculation
         if enter == 1 and exit == 1:
