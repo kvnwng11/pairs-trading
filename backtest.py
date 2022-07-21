@@ -46,8 +46,7 @@ def trade(pair):
     for symbol in pair:
         p = data_path+symbol+'.csv'
         df = pd.read_csv(p, header=None)
-        raw_data = raw_data.set_index('timestamp')
-        df.index = df.columns[0]
+        raw_data.index = df.iloc[:, 0]
         df = df.drop(df.columns[[0]], axis=1)
         d = (df.iloc[1:, :]).iloc[:, 0].to_numpy().astype(float)
         raw_data[symbol] = d
