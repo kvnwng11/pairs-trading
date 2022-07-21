@@ -9,13 +9,7 @@ import shutil
 data_path = '/home/kvnwng11/pairs-trading/csv/'
 state_path = '/home/kvnwng11/pairs-trading/state/'
 pairs = [
-    ['DOGE', 'SHIB'],
-    ['BTC', 'MATIC'],
-    ['BTC', 'XRP'],
-    ['ETH', 'ADA'],
-    ['ETH', 'SOL'],
-    ['ETH', 'XRP'],
-    ['XRP', 'ADA']
+    ['DOGE', 'SHIB']
 ]
 
 window = 30 * 1440
@@ -52,6 +46,8 @@ def trade(pair):
     for symbol in pair:
         p = data_path+symbol+'.csv'
         df = pd.read_csv(p, header=None)
+        raw_data = raw_data.set_index('timestamp')
+        df.index = df.columns[0]
         df = df.drop(df.columns[[0]], axis=1)
         d = (df.iloc[1:, :]).iloc[:, 0].to_numpy().astype(float)
         raw_data[symbol] = d
@@ -144,7 +140,8 @@ def trade(pair):
         balance *= (1+current_return)
 
         # update state file
-        new_state = {'timestamp': [today],
+        ts = raw_data.index[t]
+        new_state = {'timestamp': [ts],
                     'balance': [balance],
                     'returns': [current_return],
                     'x_position': [x_position],
