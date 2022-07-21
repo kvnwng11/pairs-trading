@@ -25,7 +25,6 @@ entry_zscore = 1
 exit_zscore = 0
 
 today = pd.to_datetime("today")  # get current timestamp
-N = 31*1440 # number of prices to read in
 
 def zscore(data, curr):
     data = np.asarray(data)
