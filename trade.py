@@ -50,13 +50,15 @@ def trade(pair):
 
     # read in last state
     last_state = pd.read_csv(state_path+statefile)
-    last_state.columns = ['timestamp', 'balance', 'returns', 'x_position', 'y_position', 'beta', 'signal', 'numtrades', 'zscore']
+    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position', 'x_enter', 'y_position', 'y_exit, 'beta', 'signal', 'numtrades', 'zscore']
     last_state = last_state.tail(1)
     old_signal = last_state['signal'].iloc[-1]
     x_old_position = last_state['x_position'].iloc[-1]
     y_old_position = last_state['y_position'].iloc[-1]
     numtrades = last_state['numtrades'].iloc[-1]
     balance = last_state['balance'].iloc[-1]
+    x_enter = last_state['x_enter'].iloc[-1]
+    y_enter = last_state['y_enter'].iloc[-1]
 
     # read in price data
     raw_data = pd.DataFrame()
@@ -90,19 +92,19 @@ def trade(pair):
 
     current_return = x_old_position*(curr_x/raw_data[x_label][t-1] - 1) + y_old_position*(curr_y/raw_data[y_label][t-1] - 1)
 
-    enter = 0
-    exit = 0
+    enter_signal = 0
+    exit_signal = 0
     # check for stop loss
     if current_return < stop_loss:
         signal = 0
-        exit = 1
+        exit_signal = 1
     # check if still in trade
     else:
         # decide to exit
-        if curr_zscore >= -exit_zscore-0.1 and curr_zscore <= exit_zscore+0.1:
+        if curr_zscore >= -exit_zscore-0.1 and curr_zscore <= exit_signal_zscore+0.1:
             signal = old_signal = 0
             x_position = y_position = 0
-            exit = 1
+            exit_signal = 1
         
         # decide to trade
         if np.sign(curr_zscore) == old_signal:
@@ -114,30 +116,43 @@ def trade(pair):
             signal = 1
             x_position = signal
             y_position = -hedge_ratio*signal
-            enter = 1
+            enter_signal = 1
         # buy signal
         elif curr_zscore < -entry_zscore:
             signal = -1
             x_position = signal
             y_position = -hedge_ratio*signal
-            enter = 1
+            enter_signal = 1
         # do nothing
         else:
             signal = 0
             x_position = y_position = 0
 
+    trade_return = 0
+
     # commission calculation
-    if enter == 1 and exit == 1:
+    if enter_signal == 1 and exit_signal == 1:
         current_return -= 2*commission
-    elif enter == 1:
+    elif enter_signal == 1:
         current_return -= commission
-    elif exit == 1:
+    elif exit_signal == 1:
         current_return -= commission
 
     if signal == 0:
         current_return = 0
-    if enter == 1:
+        x_enter = 0
+        y_enter = 0
+    else:
+        trade_return = x_position*(curr_x/x_enter - 1) + y_position*(curr_y/y_enter - 1)
+    
+    if exit_signal == 1:
+        x_enter = 0
+        y_enter = 0
+
+    if enter_signal == 1:
         numtrades += 1
+        x_enter = curr_x
+        y_enter = curr_y
 
     # calculate returns
     balance *= (1+current_return)
@@ -146,8 +161,11 @@ def trade(pair):
     new_state = {'timestamp': [today],
                 'balance': [balance],
                 'returns': [current_return],
+                'trade_returns': [trade_return],
                 'x_position': [x_position],
+                'x_enter': [x_enter],
                 'y_position': [y_position],
+                'y_enter': [y_enter],
                 'beta': [hedge_ratio],
                 'signal': [signal],
                 'numtrades': [numtrades],
