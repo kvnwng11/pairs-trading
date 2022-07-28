@@ -50,7 +50,7 @@ def trade(pair):
 
     # read in last state
     last_state = pd.read_csv(state_path+statefile)
-    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position', 'x_enter', 'y_position', 'y_exit, 'beta', 'signal', 'numtrades', 'zscore']
+    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position', 'x_enter', 'y_position', 'y_exit', 'beta', 'signal', 'numtrades', 'zscore']
     last_state = last_state.tail(1)
     old_signal = last_state['signal'].iloc[-1]
     x_old_position = last_state['x_position'].iloc[-1]
@@ -101,7 +101,7 @@ def trade(pair):
     # check if still in trade
     else:
         # decide to exit
-        if curr_zscore >= -exit_zscore-0.1 and curr_zscore <= exit_signal_zscore+0.1:
+        if curr_zscore >= -exit_zscore-0.1 and curr_zscore <= exit_zscore+0.1:
             signal = old_signal = 0
             x_position = y_position = 0
             exit_signal = 1
