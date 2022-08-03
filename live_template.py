@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from collections import deque
 from io import StringIO
@@ -38,8 +37,8 @@ def zscore(data, curr):
     return (curr - np.average(data))/np.std(data)
 
 def buy(asset, quantity, price):
-    client.create_test_order(symbol=asset, side='BUY', type='LIMIT', 
-                            timeInForce='1m', quantity=quantity,  price=price)
+    client.create_test_order(symbol=asset+'USD', side='BUY', type='LIMIT', 
+                            timeInForce='FOK', quantity=quantity,  price=price)
 
 def sell(asset, quantity, price):
     client.create_test_order(symbol=asset, side='SELL',  type='LIMIT', 
@@ -177,8 +176,8 @@ def trade(pair):
         y_enter = curr_y
 
     # execute trades
-    amt_x = 1/(1+abs(hedge_ratio)) * balance
-    amt_y = abs(hedge_ratio)/(1+abs(hedge_ratio)) * balance
+    amt_x = round(1/(1+abs(hedge_ratio)) * balance,2)
+    amt_y = round(abs(hedge_ratio)/(1+abs(hedge_ratio)) * balance,2)
 
     if old_signal == 0 and signal == 1:
         buy(x_label, amt_x,curr_x)
@@ -212,4 +211,9 @@ def trade(pair):
     update = pd.DataFrame(new_state)
     update.to_csv(live_path+statefile, mode='a', header=False, index=False)
 
-trade(pair)
+#trade(pair)
+
+info = client.get_symbol_info('DOGEUSD')
+print(info)
+
+#buy('DOGE', 15/0.08, 0.08)
