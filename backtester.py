@@ -6,17 +6,9 @@ from io import StringIO
 import os
 import shutil
 
-data_path = '/home/kvnwng11/pairs-trading/csv/'
-state_path = '/home/kvnwng11/pairs-trading/state/'
-pairs = [
-    ['DOGE', 'SHIB'],
-    ['BTC', 'MATIC'],
-    ['BTC', 'XRP'],
-    ['ETH', 'ADA'],
-    ['ETH', 'SOL'],
-    ['ETH', 'XRP'],
-    ['XRP', 'ADA']
-]
+data_path = ''
+state_path = ''
+pairs = []
 
 window = 30 * 1440
 stop_loss = -0.05
@@ -25,13 +17,16 @@ entry_zscore = 1
 exit_zscore = 0
 
 today = pd.to_datetime("today")  # get current timestamp
-N = 31*1440 # number of prices to read in
+N = 31*1440  # number of prices to read in
+
 
 def zscore(data, curr):
     data = np.asarray(data)
     return (curr - np.average(data))/np.std(data)
 
 # trade function
+
+
 def trade(pair):
     # initialize
     statefile = pair[0]+'-'+pair[1]+'.csv'
@@ -50,7 +45,8 @@ def trade(pair):
 
     # read in last state
     last_state = pd.read_csv(state_path+statefile)
-    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position', 'x_enter', 'y_position', 'y_enter', 'beta', 'signal', 'numtrades', 'zscore']
+    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position',
+                          'x_enter', 'y_position', 'y_enter', 'beta', 'signal', 'numtrades', 'zscore']
     last_state = last_state.tail(1)
     old_signal = last_state['signal'].iloc[-1]
     x_old_position = last_state['x_position'].iloc[-1]
@@ -73,24 +69,26 @@ def trade(pair):
 
     # initialize variables
     t = len(raw_data)-1
-    past_data = raw_data[[x_label,y_label]][t-window-1:t-1]
+    past_data = raw_data[[x_label, y_label]][t-window-1:t-1]
     x = np.array(past_data[x_label])
     y = np.array(past_data[y_label])
     curr_x = raw_data[x_label][t]
     curr_y = raw_data[y_label][t]
 
     # simple beta
-    reg = sm.OLS(np.log(y), sm.add_constant(np.log(x)))
-    reg = reg.fit()
-    b0 = reg.params[1]
-    hedge_ratio = b0
+    #reg = sm.OLS(np.log(y), sm.add_constant(np.log(x)))
+    #reg = reg.fit()
+    #b0 = reg.params[1]
+    hedge_ratio = 1
 
     # find current zscore
     past_spread = np.log(y) - hedge_ratio*np.log(x)
     curr_spread = np.log(curr_y) - hedge_ratio*np.log(curr_x)
     curr_zscore = zscore(past_spread, curr_spread)
 
-    current_return = x_old_position*(curr_x/raw_data[x_label][t-1] - 1) + y_old_position*(curr_y/raw_data[y_label][t-1] - 1)
+    current_return = x_old_position * \
+        (curr_x/raw_data[x_label][t-1] - 1) + \
+        y_old_position*(curr_y/raw_data[y_label][t-1] - 1)
 
     enter_signal = 0
     exit_signal = 0
@@ -105,7 +103,7 @@ def trade(pair):
             signal = old_signal = 0
             x_position = y_position = 0
             exit_signal = 1
-        
+
         # decide to trade
         if np.sign(curr_zscore) == old_signal:
             signal = old_signal
@@ -143,8 +141,9 @@ def trade(pair):
         x_enter = 0
         y_enter = 0
     else:
-        trade_return = x_position*(curr_x/x_enter - 1) + y_position*(curr_y/y_enter - 1)
-    
+        trade_return = x_position * \
+            (curr_x/x_enter - 1) + y_position*(curr_y/y_enter - 1)
+
     if exit_signal == 1:
         x_enter = 0
         y_enter = 0
@@ -159,24 +158,27 @@ def trade(pair):
 
     # update state file
     new_state = {'timestamp': [today],
-                'balance': [balance],
-                'returns': [current_return],
-                'trade_returns': [trade_return],
-                'x_position': [x_position],
-                'x_enter': [x_enter],
-                'y_position': [y_position],
-                'y_enter': [y_enter],
-                'beta': [hedge_ratio],
-                'signal': [signal],
-                'numtrades': [numtrades],
-                'zscore': [curr_zscore]}
+                 'balance': [balance],
+                 'returns': [current_return],
+                 'trade_returns': [trade_return],
+                 'x_position': [x_position],
+                 'x_enter': [x_enter],
+                 'y_position': [y_position],
+                 'y_enter': [y_enter],
+                 'beta': [hedge_ratio],
+                 'signal': [signal],
+                 'numtrades': [numtrades],
+                 'zscore': [curr_zscore]}
 
     update = pd.DataFrame(new_state)
     update.to_csv(state_path+statefile, mode='a', header=False, index=False)
 
 # driver function
+
+
 def execute():
     for pair in pairs:
         trade(pair)
+
 
 execute()

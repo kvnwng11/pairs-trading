@@ -8,16 +8,18 @@ import shutil
 
 from binance.client import Client
 from binance.enums import *
-api_key = 'XMkgHm97q4ScccpiRb1Lf0Ta8BYanEPHBjIgwZatDqaNkPcgfnuSUFaWLdOL97IF'
-api_secret = '5E2PnhoRqx0nPD3QZ7cJaGvKgnlHuiGpd15x94eXKKaWvk2DtO8qNylrC63otSIj'
-client = Client(api_key, api_secret, tld='us')
+
+api_key = ''
+api_secret = ''
+client = Client(api_key, api_secret)
 
 
-#TODO: risk management
+# TODO: Risk management
+# TODO: Better beta logic
 
 data_path = '/home/kvnwng11/pairs-trading/csv/'
 live_path = '/home/kvnwng11/pairs-trading/live/'
-pair = ['DOGE', 'SHIB']
+pair = []
 
 window = 30 * 1440
 stop_loss = -0.05
@@ -32,27 +34,34 @@ position1 = 0
 today = pd.to_datetime("today")  # get current timestamp
 N = 31*1440
 
+
 def zscore(data, curr):
     data = np.asarray(data)
     return (curr - np.average(data))/np.std(data)
 
+
 def buy(asset, quantity, price):
-    client.create_test_order(symbol=asset+'USD', side='BUY', type='LIMIT', 
-                            timeInForce='FOK', quantity=quantity,  price=price)
+    client.create_test_order(symbol=asset+'USD', side='BUY', type='LIMIT',
+                             timeInForce='FOK', quantity=quantity,  price=price)
+
 
 def sell(asset, quantity, price):
-    client.create_test_order(symbol=asset, side='SELL',  type='LIMIT', 
-                            timeInForce='1m', quantity=quantity, price=price)
+    client.create_test_order(symbol=asset, side='SELL',  type='LIMIT',
+                             timeInForce='1m', quantity=quantity, price=price)
+
 
 def short(asset, quantity, price):
-    client.create_test_order(symbol=asset, side='SELL', type='LIMIT', 
-                            timeInForce='1m', quantity=quantity,price=price)
+    client.create_test_order(symbol=asset, side='SELL', type='LIMIT',
+                             timeInForce='1m', quantity=quantity, price=price)
+
 
 def cover(asset, quantity, price):
     client.create_test_order(symbol=asset, side='BUY', type='LIMIT',
-                            timeInForce='1m', quantity=quantity, price=price)
+                             timeInForce='1m', quantity=quantity, price=price)
 
 # trade function
+
+
 def trade(pair):
     # initialize
     statefile = pair[0]+'-'+pair[1]+'.csv'
@@ -71,7 +80,8 @@ def trade(pair):
 
     # read in last state
     last_state = pd.read_csv(live_path+statefile)
-    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position', 'x_enter', 'y_position', 'y_exit', 'beta', 'signal', 'numtrades', 'zscore']
+    last_state.columns = ['timestamp', 'balance', 'returns', 'trade_returns', 'x_position',
+                          'x_enter', 'y_position', 'y_exit', 'beta', 'signal', 'numtrades', 'zscore']
     last_state = last_state.tail(1)
     old_signal = last_state['signal'].iloc[-1]
     x_old_position = last_state['x_position'].iloc[-1]
@@ -94,24 +104,26 @@ def trade(pair):
 
     # initialize variables
     t = len(raw_data)-1
-    past_data = raw_data[[x_label,y_label]][t-window-1:t-1]
+    past_data = raw_data[[x_label, y_label]][t-window-1:t-1]
     x = np.array(past_data[x_label])
     y = np.array(past_data[y_label])
     curr_x = raw_data[x_label][t]
     curr_y = raw_data[y_label][t]
 
     # simple beta
-    reg = sm.OLS(np.log(y), sm.add_constant(np.log(x)))
-    reg = reg.fit()
-    b0 = reg.params[1]
-    hedge_ratio = b0
+    #reg = sm.OLS(np.log(y), sm.add_constant(np.log(x)))
+    #reg = reg.fit()
+    #b0 = reg.params[1]
+    hedge_ratio = 1
 
     # find current zscore
     past_spread = np.log(y) - hedge_ratio*np.log(x)
     curr_spread = np.log(curr_y) - hedge_ratio*np.log(curr_x)
     curr_zscore = zscore(past_spread, curr_spread)
 
-    current_return = x_old_position*(curr_x/raw_data[x_label][t-1] - 1) + y_old_position*(curr_y/raw_data[y_label][t-1] - 1)
+    current_return = x_old_position * \
+        (curr_x/raw_data[x_label][t-1] - 1) + \
+        y_old_position*(curr_y/raw_data[y_label][t-1] - 1)
 
     enter_signal = 0
     exit_signal = 0
@@ -126,7 +138,7 @@ def trade(pair):
             signal = old_signal = 0
             x_position = y_position = 0
             exit_signal = 1
-        
+
         # decide to trade
         if np.sign(curr_zscore) == old_signal:
             signal = old_signal
@@ -164,8 +176,9 @@ def trade(pair):
         x_enter = 0
         y_enter = 0
     else:
-        trade_return = x_position*(curr_x/x_enter - 1) + y_position*(curr_y/y_enter - 1)
-    
+        trade_return = x_position * \
+            (curr_x/x_enter - 1) + y_position*(curr_y/y_enter - 1)
+
     if exit_signal == 1:
         x_enter = 0
         y_enter = 0
@@ -176,11 +189,11 @@ def trade(pair):
         y_enter = curr_y
 
     # execute trades
-    amt_x = round(1/(1+abs(hedge_ratio)) * balance,2)
-    amt_y = round(abs(hedge_ratio)/(1+abs(hedge_ratio)) * balance,2)
+    amt_x = round(1/(1+abs(hedge_ratio)) * balance, 2)
+    amt_y = round(abs(hedge_ratio)/(1+abs(hedge_ratio)) * balance, 2)
 
     if old_signal == 0 and signal == 1:
-        buy(x_label, amt_x,curr_x)
+        buy(x_label, amt_x, curr_x)
         short(y_label, amt_y, curr_y)
     elif old_signal == 0 and signal == -1:
         short(x_label, amt_x, curr_x)
@@ -196,22 +209,23 @@ def trade(pair):
     balance *= (1+current_return)
     # update state file
     new_state = {'timestamp': [today],
-                'balance': [balance],
-                'returns': [current_return],
-                'trade_returns': [trade_return],
-                'x_position': [x_position],
-                'x_enter': [x_enter],
-                'y_position': [y_position],
-                'y_enter': [y_enter],
-                'beta': [hedge_ratio],
-                'signal': [signal],
-                'numtrades': [numtrades],
-                'zscore': [curr_zscore]}
+                 'balance': [balance],
+                 'returns': [current_return],
+                 'trade_returns': [trade_return],
+                 'x_position': [x_position],
+                 'x_enter': [x_enter],
+                 'y_position': [y_position],
+                 'y_enter': [y_enter],
+                 'beta': [hedge_ratio],
+                 'signal': [signal],
+                 'numtrades': [numtrades],
+                 'zscore': [curr_zscore]}
 
     update = pd.DataFrame(new_state)
     update.to_csv(live_path+statefile, mode='a', header=False, index=False)
 
-#trade(pair)
+# trade(pair)
+
 
 info = client.get_symbol_info('DOGEUSD')
 print(info)
