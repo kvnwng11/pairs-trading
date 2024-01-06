@@ -1,7 +1,6 @@
-pandas
 numpy
-scipy
+pandas
 statsmodels
-python-binance
-datetime
+yfinance
+matplotlib
 requests
