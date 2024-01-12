@@ -5,8 +5,8 @@ from Trader import Trader
 # Get data
 start = '2023-01-01'
 end = pd.to_datetime('today')
-btc = list(yf.download('BTC-USD', start, end)['Close'])
-eth = list(yf.download('ETH-USD', start, end)['Close'])
+btc = list(yf.download('BTC-USD', start, end)['Open'])
+eth = list(yf.download('ETH-USD', start, end)['Open'])
 
 # Initialize
 trader = Trader("BTC-USD", "ETH-USD", window=30)
