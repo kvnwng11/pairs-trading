@@ -16,7 +16,9 @@ The Trader class models the logarithmic prices of two assets as such:
 
 $$\log(y_t) = \alpha + \beta \log(x_t) + \epsilon_t$$
 
-where $\epsilon_t$ is a stationary process with mean zero. The spread $\log(y_t) - \beta \log(x_t)$ oscillates around some equilibrum. The Trader class goes long one unit of $y_t$ and short $\beta$ units of $x_t$ when the spread is below some threshold. Conversely, Trader goes long  $\beta$ units of $x_t$ and short one unit of $y_t$ and shortwhen the spread is above some threshold. $\beta$ is estimated via OLS.
+where $\epsilon_t$ is a stationary process with mean zero. 
+
+The spread $\log(y_t) - \beta \log(x_t)$ oscillates around some equilibrum. The Trader class goes long one unit of $y_t$ and short $\beta$ units of $x_t$ when the spread is below some threshold. Conversely, Trader goes long  $\beta$ units of $x_t$ and short one unit of $y_t$ and shortwhen the spread is above some threshold. $\beta$ is estimated via OLS.
 
 ## Backtests
 
