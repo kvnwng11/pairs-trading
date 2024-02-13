@@ -26,11 +26,13 @@ class Trader:
         # Trading parameters
         self.stop_loss = -0.05
         self.commission = 0.001
+        self.tax = 0.20
         self.entry_zscore = 1
         self.exit_zscore = 0.5
 
         # Results of strategy
         self.returns = []
+        self.taxed_returns = []
         self.zscores = []
         self.buy_signals = []
         self.sell_signals = []
@@ -89,6 +91,7 @@ class Trader:
 
         # Daily return
         current_return = self.weight1*(curr_x/self.data[self.coin1][-2] - 1) + self.weight2*(curr_y/self.data[self.coin2][-2] - 1)
+        taxed_return = 0
 
         # Stop loss
         if current_return < self.stop_loss:
@@ -103,8 +106,13 @@ class Trader:
         elif self.state != PositionType.NONE and z_score >= -self.exit_zscore and z_score <= self.exit_zscore:
             self.weight1 = self.weight2 = 0
             self.state = PositionType.NONE
+
+            if current_return > 0:
+                taxed_return -= self.tax
+
             current_return -= self.commission
             # TODO: Use API to place trade
+
 
             exit = z_score
 
@@ -130,7 +138,10 @@ class Trader:
 
             buy = z_score
 
+        taxed_return += current_return
+
         self.returns.append(current_return)
+        self.taxed_returns.append(taxed_return)
         self.zscores.append(z_score)
         self.buy_signals.append(buy)
         self.sell_signals.append(sell)
@@ -140,7 +151,8 @@ class Trader:
         """  Plot returns  """
         plt.figure(figsize=(20,12))
         plt.plot(np.append(1,np.cumprod(1+np.array(self.returns))))
-        plt.legend(['Gross returns'])
+        plt.plot(np.append(1,np.cumprod(1+np.array(self.taxed_returns))))
+        plt.legend(['Net return', 'Taxed returns'])
         plt.show()
 
     def plot_zscores(self):
