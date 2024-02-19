@@ -26,7 +26,7 @@ class Trader:
         # Trading parameters
         self.stop_loss = -0.05
         self.commission = 0.001
-        self.tax = 0.20
+        self.tax = 0.15
         self.entry_zscore = 1
         self.exit_zscore = 0.5
 
