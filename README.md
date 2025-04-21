@@ -1,6 +1,6 @@
 # Pairs Trading
 
-A trading bot to backtest and paper-trade any pairs trading strategy. Made to trade cryptocurrencies.
+A lightweight pairs trading bot. Made to quickly and accurately backtest strategies. 
 
 ---
 
