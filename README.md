@@ -14,7 +14,7 @@ The spread $\log(y_t) - \beta \log(x_t)$ oscillates around some equilibrum. We g
 
 ## Parameters
 
-For risk management, trader uses a stop loss of 5% and assumes 0.1% commissions.
+For risk management, we use a stop loss of 5% and assumes 0.1% commissions.
 
 The bot buys the spread when the z-score is below -1, and shorts the spread when the z-score is above 1. Positions are exited when -0.5 $\leq$ z-score $\leq$ 0.5. 
 
